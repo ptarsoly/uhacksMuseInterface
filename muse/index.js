@@ -1,42 +1,53 @@
-var nodeMuse = require("node-muse");
-var express = require('express');
-
+var nodeMuse = require('node-muse');
+var request = require('request-json');
+var client = request.createClient('http://10.223.57.29:8011');
+ 
 var jsonData = {
     'blink':0,
     'concentration':0.0,
     'mellow':0.0
 };
 
-var app = express();
-app.listen(3001);
-
-app.get('/data', (req, res) => {
-    res.send(jsonData);
-});
-
-
 var Muse = nodeMuse.Muse;
 var OSC = nodeMuse.OSC;
 var blinkCount = 0;
 
-
-
 Muse.on('/muse/elements/blink', function(data){
-    if(data.values == 1 && jsonData.blink != 1) {
-        jsonData.blink = 1;
+    jsonData.blink = data.values;
+    if(jsonData.blink  == 1) {
+        console.log("BLINK");
+        client.post('/posts/', jsonData, function(err, res, body) {
+            return console.log(res.statusCode);
+          });
     }
-    else if(data.values == 0 && jsonData.blink != 0) {
-        jsonData.blink = 0;
-    }
+    
+
 });
 
-Muse.on('/muse/experimental/concentration', function(data) {
+Muse.on('/muse/elements/experimental/concentration', function(data) {
     jsonData.concentration = data.values;
-
+    if(jsonData.concentration >= 0.5) {
+        console.log("Concentrating");
+        client.post('/posts/', jsonData, function(err, res, body) {
+            return console.log(res.statusCode);
+          });
+    }
+    
 });
 
-Muse.on('/muse/experimental/mellow', function(data) {
+Muse.on('/muse/elements/experimental/mellow', function(data) {
     jsonData.mellow = data.values;
+    if(jsonData.mellow >= 0.5) {
+        console.log("Mellowing out");
+        client.post('/posts/', jsonData, function(err, res, body) {
+            return console.log(res.statusCode);
+          });
+    }
+    
+});
+
+Muse.on('disconnected', function(){
+    console.log("No sensor =  no fun");
 });
 
 nodeMuse.connect();
