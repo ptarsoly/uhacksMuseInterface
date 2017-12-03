@@ -1,0 +1,11 @@
+{
+  "name": "brain-reader",
+  "version": "1.0.0",
+  "description": "Outputs vital brain signals to a JSON format",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "ptarsoly",
+  "license": "ISC"
+}
